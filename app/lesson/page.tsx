@@ -17,6 +17,7 @@ type Section = {
   title: string;
   content: string;
   type: "explanation" | "example" | "visual_description";
+  imageUrl?: string;
 };
 
 type Checkpoint = {
@@ -369,6 +370,14 @@ function LessonInner() {
                       </span>
                     </div>
                     <h3 className="text-xl font-semibold mb-3">{s.title}</h3>
+                    {s.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={s.imageUrl}
+                        alt={s.title}
+                        className="w-full rounded-2xl my-4 max-h-72 object-cover shadow-sm"
+                      />
+                    )}
                     <p className="text-neutral-800 leading-relaxed whitespace-pre-wrap">
                       {s.content}
                     </p>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import OpenAI from "openai";
 import { gbrainQuery } from "@/lib/gbrain";
 import { complete, extractJSON } from "@/lib/claude";
 
@@ -9,6 +10,7 @@ type Section = {
   title: string;
   content: string;
   type: "explanation" | "example" | "visual_description";
+  imageUrl?: string;
 };
 
 type Checkpoint = {
@@ -346,6 +348,37 @@ export async function POST(req: Request) {
 
     if (!lesson) {
       lesson = fallbackLesson(topic, studentProfile);
+    }
+
+    if (
+      studentProfile.learningStyle === "visuals" &&
+      lesson &&
+      lesson.sections.length > 0
+    ) {
+      const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const sectionsToImage = lesson.sections.slice(0, 2);
+      await Promise.all(
+        sectionsToImage.map(async (section, i) => {
+          try {
+            const response = await openaiClient.responses.create({
+              model: "gpt-5.5",
+              input: `Generate a simple clean educational diagram illustrating: "${section.title}". Flat design, minimal, white background, bright colors, no text in image.`,
+              tools: [{ type: "image_generation" }],
+            });
+
+            const imageData = response.output
+              .filter((o: any) => o.type === "image_generation_call")
+              .map((o: any) => o.result);
+
+            if (imageData.length > 0) {
+              section.imageUrl = `data:image/png;base64,${imageData[0]}`;
+              console.log(`[lesson] image generated for section ${i}: ${section.title}`);
+            }
+          } catch (e) {
+            console.warn("[lesson] image gen failed for section", i, e);
+          }
+        })
+      );
     }
 
     return NextResponse.json({
