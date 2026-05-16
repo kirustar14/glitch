@@ -27,6 +27,10 @@ const STYLE_OPTIONS: LearningStyle[] = ["examples", "theory", "visuals"];
 const LEVEL_OPTIONS: SkillLevel[] = ["beginner", "intermediate", "advanced"];
 const LENGTH_OPTIONS: LessonLength[] = ["short", "medium", "deep"];
 
+function capitalize(s: string): string {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([
@@ -146,7 +150,7 @@ export default function OnboardingPage() {
         <div className="flex items-center gap-4 mb-6">
           <Byte size={80} mood={done ? "correct" : "checkin"} priority />
           <div>
-            <h1 className="text-2xl font-bold">onboarding with byte</h1>
+            <h1 className="text-2xl font-bold">Onboarding With Byte</h1>
             <p className="text-sm text-neutral-500">just a few quick questions</p>
           </div>
         </div>
@@ -163,8 +167,10 @@ export default function OnboardingPage() {
                   onClick={() => selectPersona(key as keyof typeof DEMO_PERSONAS)}
                   className="px-4 py-2 rounded-full border border-neutral-300 text-sm hover:bg-neutral-50"
                 >
-                  {key} — {DEMO_PERSONAS[key].learningStyle},{" "}
-                  {DEMO_PERSONAS[key].skillLevel}, {DEMO_PERSONAS[key].lessonLength}
+                  {key} —{" "}
+                  {capitalize(DEMO_PERSONAS[key].learningStyle)},{" "}
+                  {capitalize(DEMO_PERSONAS[key].skillLevel)},{" "}
+                  {capitalize(DEMO_PERSONAS[key].lessonLength)}
                 </button>
               ))}
             </div>
@@ -209,7 +215,7 @@ export default function OnboardingPage() {
               className="flex-1 px-5 py-3 rounded-full border border-neutral-300 focus:outline-none focus:border-black"
             />
             <PillButton type="submit" disabled={!input.trim()}>
-              send
+              Send
             </PillButton>
           </form>
         )}
@@ -231,7 +237,7 @@ export default function OnboardingPage() {
         {done && (
           <div className="mt-6 flex justify-end">
             <PillButton onClick={() => router.push("/dashboard")}>
-              start learning →
+              Start Learning →
             </PillButton>
           </div>
         )}

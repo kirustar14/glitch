@@ -292,7 +292,7 @@ function LessonInner() {
       <main className="min-h-screen flex flex-col items-center justify-center bg-white gap-4 px-6">
         <Byte size={120} mood="default" />
         <p className="text-red-700">{error || "lesson unavailable"}</p>
-        <PillButton href="/dashboard">back to dashboard</PillButton>
+        <PillButton href="/dashboard">Back to Dashboard</PillButton>
       </main>
     );
   }
@@ -318,7 +318,7 @@ function LessonInner() {
           onClick={() => router.push("/dashboard")}
           className="text-sm text-neutral-500 hover:text-black mb-6"
         >
-          ← back to dashboard
+          ← Back to Dashboard
         </button>
 
         <header className="flex flex-col md:flex-row items-center gap-6 mb-10">
@@ -427,10 +427,10 @@ function LessonInner() {
             <div className="flex flex-wrap gap-3 justify-end">
               {!attempts.every((a) => a.correct) && (
                 <PillButton variant="secondary" onClick={reviewAgain}>
-                  review this topic again →
+                  Review This Topic Again →
                 </PillButton>
               )}
-              <PillButton onClick={finishLesson}>next topic →</PillButton>
+              <PillButton onClick={finishLesson}>Next Topic →</PillButton>
             </div>
           </div>
         )}
@@ -499,13 +499,13 @@ function CheckpointCard({
             onClick={onShowHint}
             className="text-sm text-neutral-500 hover:text-black"
           >
-            need a hint?
+            Need a Hint?
           </button>
           <PillButton
             onClick={onSubmit}
             disabled={!state.answer.trim() || state.checking}
           >
-            {state.checking ? "checking…" : "check answer"}
+            {state.checking ? "Checking…" : "Check Answer"}
           </PillButton>
         </div>
       )}
@@ -524,7 +524,7 @@ function CheckpointCard({
           )}
           <div className="mt-4 flex justify-end">
             <PillButton onClick={onContinue}>
-              {isLast ? "finish lesson →" : "continue →"}
+              {isLast ? "Finish Lesson →" : "Continue →"}
             </PillButton>
           </div>
         </>

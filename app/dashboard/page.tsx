@@ -203,22 +203,21 @@ function DashboardInner() {
     <main className="min-h-screen bg-white px-6 py-10">
       <div className="max-w-5xl mx-auto">
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
-          <h1 className="text-4xl font-bold">hey {profile.name} 👋</h1>
+          <h1 className="text-4xl font-bold">Hey {profile.name}!</h1>
           <div className="flex flex-wrap gap-3">
             {hasCourses && (
               <PillButton href="/upload" variant="secondary">
-                upload new course
+                Upload New Course
               </PillButton>
             )}
             <PillButton href="/onboarding" variant="secondary">
-              edit profile
+              Edit Profile
             </PillButton>
           </div>
         </header>
 
         <section className="grid md:grid-cols-[260px,1fr] gap-8 mb-12">
           <div className="flex flex-col items-center md:items-start gap-4">
-            <Byte size={220} mood={hasCourses ? "explaining" : "checkin"} priority />
             <SpeechBubble tail="bottom">
               <span className="text-sm">
                 {hasCourses
@@ -226,6 +225,7 @@ function DashboardInner() {
                   : "upload a course to get started"}
               </span>
             </SpeechBubble>
+            <Byte size={220} mood={hasCourses ? "explaining" : "checkin"} priority />
           </div>
 
           <div className="border border-neutral-200 rounded-2xl p-6">
@@ -260,15 +260,15 @@ function DashboardInner() {
               drop in a PDF of your slides or notes and byte will build a personalized
               curriculum from it.
             </p>
-            <PillButton href="/upload">upload your first course →</PillButton>
+            <PillButton href="/upload">Upload Your First Course →</PillButton>
           </section>
         ) : (
           <section>
             <div className="flex items-end justify-between mb-6 gap-4 flex-wrap">
               <h2 className="text-2xl font-bold">your curriculum</h2>
-              {source && (
+              {curriculum.length > 0 && (
                 <span className="text-xs text-neutral-400">
-                  source: {source} · {curriculum.length} topics
+                  {curriculum.length} topics
                 </span>
               )}
             </div>
@@ -345,7 +345,7 @@ function DashboardInner() {
                             item.title
                           )}&course=${encodeURIComponent(selectedSlug)}`}
                         >
-                          {isDone ? "review →" : "start →"}
+                          {isDone ? "Review →" : "Start →"}
                         </PillButton>
                       </div>
                     </div>

@@ -159,7 +159,7 @@ export default function UploadPage() {
 
           <div className="mt-8 flex justify-end">
             <PillButton onClick={saveAndContinue} disabled={!courseName.trim()}>
-              save course →
+              Save Course →
             </PillButton>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function UploadPage() {
           onClick={() => router.push("/dashboard")}
           className="text-sm text-neutral-500 hover:text-black mb-6"
         >
-          ← back
+          ← Back
         </button>
 
         <header className="flex flex-col md:flex-row items-center gap-6 mb-10">
@@ -230,10 +230,10 @@ export default function UploadPage() {
 
         <div className="mt-8 flex justify-end gap-3">
           <PillButton variant="secondary" href="/dashboard">
-            cancel
+            Cancel
           </PillButton>
           <PillButton onClick={startUpload} disabled={!file}>
-            ingest →
+            Ingest →
           </PillButton>
         </div>
       </div>
