@@ -249,6 +249,12 @@ function DashboardInner() {
                 <dt className="text-xs text-neutral-500">lesson length</dt>
                 <dd className="text-lg font-medium">{profile.lessonLength}</dd>
               </div>
+              <div className="col-span-2">
+                <dt className="text-xs text-neutral-500">interests</dt>
+                <dd className="text-lg font-medium">
+                  {profile.interests || "—"}
+                </dd>
+              </div>
             </dl>
           </div>
         </section>

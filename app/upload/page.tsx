@@ -5,12 +5,20 @@ import { useRouter } from "next/navigation";
 import Byte from "@/components/Byte";
 import SpeechBubble from "@/components/SpeechBubble";
 import PillButton from "@/components/PillButton";
-import { addCourse, prettifyFilename, saveSelectedCourse } from "@/lib/profile";
+import {
+  addCourse,
+  loadProfile,
+  prettifyFilename,
+  saveSelectedCourse,
+  type StudentProfile,
+} from "@/lib/profile";
 
-const PROGRESS_MESSAGES = [
-  "reading your slides...",
-  "building your brain...",
-  "almost ready...",
+const FALLBACK_VIBE_MESSAGES = [
+  "byte is warming up the neurons...",
+  "loading your personalized experience...",
+  "almost there, making it perfect for you...",
+  "byte is reading every word so you don't have to...",
+  "good things take time... this is a good thing",
 ];
 
 type Phase = "pick" | "uploading" | "naming";
@@ -26,19 +34,109 @@ export default function UploadPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [phase, setPhase] = useState<Phase>("pick");
-  const [progressIdx, setProgressIdx] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [ingested, setIngested] = useState<IngestResponse | null>(null);
   const [courseName, setCourseName] = useState("");
+  const [profile, setProfile] = useState<StudentProfile | null>(null);
+  const [vibeMessages, setVibeMessages] = useState<string[]>([]);
+  const [vibeIndex, setVibeIndex] = useState(0);
+  const [refilling, setRefilling] = useState(false);
 
   useEffect(() => {
-    if (phase !== "uploading") return;
+    setProfile(loadProfile());
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "uploading" || !profile) return;
+
+    const fileTopic = file?.name?.replace(/\.pdf$/i, "") || "your course";
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/vibe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentName: profile.name,
+            interests: profile.interests || "everything",
+            topic: fileTopic,
+            count: 10,
+          }),
+        });
+        const data = (await res.json()) as { messages?: string[] };
+        if (cancelled) return;
+        if (res.ok && Array.isArray(data.messages) && data.messages.length > 0) {
+          setVibeMessages(data.messages);
+        } else {
+          setVibeMessages(FALLBACK_VIBE_MESSAGES);
+        }
+      } catch (e) {
+        console.warn("[upload] vibe fetch failed:", e);
+        if (!cancelled) setVibeMessages(FALLBACK_VIBE_MESSAGES);
+      }
+      setVibeIndex(0);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [phase, profile, file]);
+
+  useEffect(() => {
+    if (phase !== "uploading" || vibeMessages.length === 0) return;
     const id = setInterval(() => {
-      setProgressIdx((i) => (i + 1) % PROGRESS_MESSAGES.length);
-    }, 2200);
+      setVibeIndex((i) => i + 1);
+    }, 5000);
     return () => clearInterval(id);
-  }, [phase]);
+  }, [phase, vibeMessages.length]);
+
+  useEffect(() => {
+    if (phase !== "uploading" || !profile) return;
+    if (refilling || vibeMessages.length === 0) return;
+    if (vibeIndex < vibeMessages.length - 2) return;
+
+    const fileTopic = file?.name?.replace(/\.pdf$/i, "") || "your course";
+    let cancelled = false;
+    setRefilling(true);
+    (async () => {
+      try {
+        const res = await fetch("/api/vibe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentName: profile.name,
+            interests: profile.interests || "everything",
+            topic: fileTopic,
+            count: 10,
+          }),
+        });
+        const data = (await res.json()) as { messages?: string[] };
+        if (
+          !cancelled &&
+          res.ok &&
+          Array.isArray(data.messages) &&
+          data.messages.length > 0
+        ) {
+          setVibeMessages((prev) => [...prev, ...data.messages!]);
+        }
+      } catch (e) {
+        console.warn("[upload] vibe refill failed:", e);
+      } finally {
+        if (!cancelled) setRefilling(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [vibeIndex, vibeMessages.length, phase, profile, file, refilling]);
+
+  const currentVibe =
+    vibeMessages.length > 0
+      ? vibeMessages[vibeIndex % vibeMessages.length]
+      : "warming up...";
 
   function pickFile(f: File | undefined | null) {
     setError(null);
@@ -54,7 +152,6 @@ export default function UploadPage() {
     if (!file) return;
     setError(null);
     setPhase("uploading");
-    setProgressIdx(0);
 
     try {
       const form = new FormData();
@@ -111,11 +208,13 @@ export default function UploadPage() {
 
   if (phase === "uploading") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-white px-6 gap-8">
-        <Byte size={200} mood="explaining" priority />
-        <SpeechBubble tail="bottom">
-          <span className="text-lg">{PROGRESS_MESSAGES[progressIdx]}</span>
+      <main className="min-h-screen flex flex-col items-center justify-center bg-white px-6 gap-6">
+        <SpeechBubble tail="bottom" className="max-w-md text-center">
+          <span key={vibeIndex} className="vibe-fade inline-block text-lg">
+            {currentVibe}
+          </span>
         </SpeechBubble>
+        <Byte size={200} mood="explaining" priority />
         <p className="text-sm text-neutral-400">
           this can take a minute on a big deck — hang tight
         </p>

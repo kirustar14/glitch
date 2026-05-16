@@ -7,6 +7,7 @@ export type StudentProfile = {
   learningStyle: LearningStyle;
   skillLevel: SkillLevel;
   lessonLength: LessonLength;
+  interests: string;
   createdAt: string;
 };
 
@@ -154,6 +155,7 @@ export const DEMO_PERSONAS: Record<string, StudentProfile> = {
     learningStyle: "visuals",
     skillLevel: "beginner",
     lessonLength: "short",
+    interests: "Pokemon",
     createdAt: "",
   },
   Sam: {
@@ -161,6 +163,7 @@ export const DEMO_PERSONAS: Record<string, StudentProfile> = {
     learningStyle: "theory",
     skillLevel: "advanced",
     lessonLength: "deep",
+    interests: "F1 racing",
     createdAt: "",
   },
   Jordan: {
@@ -168,6 +171,7 @@ export const DEMO_PERSONAS: Record<string, StudentProfile> = {
     learningStyle: "examples",
     skillLevel: "intermediate",
     lessonLength: "medium",
+    interests: "Percy Jackson",
     createdAt: "",
   },
 };

@@ -21,6 +21,7 @@ const QUESTIONS = [
   "how do you learn best — examples, theory, or visuals?",
   "how much do you already know about this topic? (beginner / intermediate / advanced)",
   "how long do you want lessons to be? (short / medium / deep dives)",
+  "last one — what are you into? movies, shows, sports, games, anything goes 🎮",
 ];
 
 const STYLE_OPTIONS: LearningStyle[] = ["examples", "theory", "visuals"];
@@ -87,6 +88,7 @@ export default function OnboardingPage() {
     if (step === 1) next.learningStyle = normalizeStyle(value);
     if (step === 2) next.skillLevel = normalizeLevel(value);
     if (step === 3) next.lessonLength = normalizeLength(value);
+    if (step === 4) next.interests = value;
 
     setProfile(next);
 
@@ -99,6 +101,7 @@ export default function OnboardingPage() {
         learningStyle: next.learningStyle || "examples",
         skillLevel: next.skillLevel || "beginner",
         lessonLength: next.lessonLength || "short",
+        interests: next.interests || "everything",
         createdAt: new Date().toISOString(),
       };
       saveProfile(complete);
@@ -127,7 +130,10 @@ export default function OnboardingPage() {
         : p.lessonLength === "medium"
         ? "medium-rare lessons coming up"
         : "snack-sized lessons, easy to digest";
-    return `nice to meet you ${p.name}! ${styleBit}. ${levelBit}. ${lengthBit}. ready?`;
+    const interestsBit = p.interests
+      ? ` and i'll sneak in some ${p.interests} references whenever i can`
+      : "";
+    return `nice to meet you ${p.name}! ${styleBit}. ${levelBit}. ${lengthBit}${interestsBit}. ready?`;
   }
 
   function selectPersona(key: keyof typeof DEMO_PERSONAS) {
@@ -170,7 +176,8 @@ export default function OnboardingPage() {
                   {key} —{" "}
                   {capitalize(DEMO_PERSONAS[key].learningStyle)},{" "}
                   {capitalize(DEMO_PERSONAS[key].skillLevel)},{" "}
-                  {capitalize(DEMO_PERSONAS[key].lessonLength)}
+                  {capitalize(DEMO_PERSONAS[key].lessonLength)},{" "}
+                  loves {DEMO_PERSONAS[key].interests}
                 </button>
               ))}
             </div>

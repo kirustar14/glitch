@@ -76,6 +76,109 @@ function LessonInner() {
   const [stage, setStage] = useState(0);
   const [checkpointStates, setCheckpointStates] = useState<CheckpointState[]>([]);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
+  const FALLBACK_VIBE_MESSAGES = [
+    "byte is warming up the neurons...",
+    "loading your personalized experience...",
+    "almost there, making it perfect for you...",
+    "byte is reading every word so you don't have to...",
+    "good things take time... this is a good thing",
+  ];
+  const [vibeMessages, setVibeMessages] = useState<string[]>([]);
+  const [vibeIndex, setVibeIndex] = useState(0);
+  const [refilling, setRefilling] = useState(false);
+
+  useEffect(() => {
+    if (!loading || !profile || !topic) return;
+
+    let cancelled = false;
+
+    async function fetchBatch(count: number): Promise<string[]> {
+      try {
+        const res = await fetch("/api/vibe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentName: profile!.name,
+            interests: profile!.interests || "everything",
+            topic,
+            count,
+          }),
+        });
+        const data = (await res.json()) as { messages?: string[] };
+        if (res.ok && Array.isArray(data.messages) && data.messages.length > 0) {
+          return data.messages;
+        }
+      } catch (e) {
+        console.warn("[lesson] vibe fetch failed:", e);
+      }
+      return [];
+    }
+
+    (async () => {
+      const batch = await fetchBatch(10);
+      if (cancelled) return;
+      setVibeMessages(batch.length > 0 ? batch : FALLBACK_VIBE_MESSAGES);
+      setVibeIndex(0);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, profile, topic]);
+
+  useEffect(() => {
+    if (!loading || vibeMessages.length === 0) return;
+    const id = setInterval(() => {
+      setVibeIndex((i) => i + 1);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [loading, vibeMessages.length]);
+
+  useEffect(() => {
+    if (!loading || !profile || !topic) return;
+    if (refilling) return;
+    if (vibeMessages.length === 0) return;
+    if (vibeIndex < vibeMessages.length - 2) return;
+
+    let cancelled = false;
+    setRefilling(true);
+    (async () => {
+      try {
+        const res = await fetch("/api/vibe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentName: profile.name,
+            interests: profile.interests || "everything",
+            topic,
+            count: 10,
+          }),
+        });
+        const data = (await res.json()) as { messages?: string[] };
+        if (
+          !cancelled &&
+          res.ok &&
+          Array.isArray(data.messages) &&
+          data.messages.length > 0
+        ) {
+          setVibeMessages((prev) => [...prev, ...data.messages!]);
+        }
+      } catch (e) {
+        console.warn("[lesson] vibe refill failed:", e);
+      } finally {
+        if (!cancelled) setRefilling(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [vibeIndex, vibeMessages.length, loading, profile, topic, refilling]);
+
+  const currentVibe =
+    vibeMessages.length > 0
+      ? vibeMessages[vibeIndex % vibeMessages.length]
+      : "warming up...";
 
   useEffect(() => {
     const p = loadProfile();
@@ -280,9 +383,13 @@ function LessonInner() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-white gap-4">
-        <Byte size={120} mood="explaining" />
-        <p className="text-neutral-500">byte is preparing your lesson…</p>
+      <main className="min-h-screen flex flex-col items-center justify-center bg-white gap-6 px-6">
+        <SpeechBubble tail="bottom" className="max-w-md text-center">
+          <span key={vibeIndex} className="vibe-fade inline-block text-lg">
+            {currentVibe}
+          </span>
+        </SpeechBubble>
+        <Byte size={200} mood="explaining" priority />
       </main>
     );
   }
