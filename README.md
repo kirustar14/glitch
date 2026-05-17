@@ -180,6 +180,6 @@ Built in one day using **GStack** for the development workflow and **GBrain** as
 
 ---
 
-*Built with 🧠 by humans, taught by a tiny gremlin named Byte.*
+*Built by humans, taught by a tiny gremlin named Byte.*
 
 </div>
